@@ -204,3 +204,28 @@ const struct sched_class casio_sched_class = {
     .set_curr_task          = set_curr_task_casio,
     .task_tick              = task_tick_casio,
 };
+struct casio_event_log casio_event_log;
+struct casio_event_log* get_casio_event_log(){
+    return &casio_event_log;
+}
+void register_casio_event(unsigned long long t, char* m, int a){
+    if (casio_event_log.lines < CASIO_MAX_EVENT_LINES){
+        casio_event_log.casio_event[casio_event_log.lines].action = a;
+        casio_event_log.casio_event[casio_event_log.lines].timestamp = t;
+        strncpy(casio_event_log.casio_event[casio_event_log.lines].msg, m,
+CASIO_MSG_SIZE – 1);
+        casio_event_log.lines++;
+        } else {
+            printk(KERN_ALERT “register_casio_event: full\n”);
+        }
+}
+void init_casio_event_log(){
+    char msg[CASIO_MSG_SIZE];
+    casio_event_log.lines = casio_event_log.cursor = 0;
+    snprintf(msg, CASIO_MSG_SIZE, “init_casio_event_log: (%lu:%lu)”,
+casio_event_log.lines, casio_event_log.cursor);
+    register_casio_event(sched_clock(), msg, CASIO_MSG);
+}
+snprintf(msg, CASIO_MSG_SIZE, “mensaje %d %lu”, valor1, valor2);
+register_casio_event(sched_clock(), msg, CASIO_MSG) ;
+char msg[CASIO_MSG_SIZE];
