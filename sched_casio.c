@@ -136,6 +136,60 @@ static void dequeue_task_casio(struct rq* rq, struct task_struct* p, int sleep)
         }
     }
 }
+static void check_preempt_curr_casio(struct rq* rq, struct task_struct* p)
+{
+    struct casio_task* t = NULL;
+    struct casio_task* curr = NULL;
+    if (rq->curr->policy != SCHED_CASIO){
+        resched_task(rq->curr);
+    } else {
+        t = earliest_deadline_casio_task_rb_tree(&rq->casio_rq);
+        if (t){
+            curr = find_casio_task_list(&rq->casio_rq, rq->curr);
+            if (curr){
+                if (t->absolute_deadline < curr->absolute_deadline)
+                        resched_task(rq->curr);
+            } else {
+                printk(KERN_ALERT "check_preempt_curr_casio\n");
+            }
+        }
+    }
+}
+static struct task_struct* pick_next_task_casio(struct rq* rq)
+{
+    struct casio_task* t = NULL;
+    t = earliest_deadline_casio_task_rb_tree(&rq->casio_rq);
+    if (t){
+        return t->task;
+    }
+    return NULL;
+}
+static void put_prev_task_casio(struct rq* rq, struct task_struct* prev)
+{
+}
+#ifdef CONFIG_SMP
+static unsigned long load_balance_casio(struct rq* this_rq, int this_cpu,
+                struct rq* busiest,
+                unsigned long max_load_move,
+                struct sched_domain* sd, enum cpu_idle_type idle,
+                int* all_pinned, int* this_best_prio)
+{
+        return 0;
+}
+static int move_one_task_casio(struct rq* this_rq, int this_cpu,
+                struct rq* busiest,
+                struct sched_domain* sd,
+                enum cpu_idle_type idle)
+{
+        return 0;
+}
+static void set_curr_task_casio(struct rq* rq)
+{
+}
+static void task_tick_casio(struct rq* rq, struct task_struct* p)
+{
+}
+#endif
 const struct sched_class casio_sched_class = {
     .next                   = &rt_sched_class,
     .enqueue_task           = enqueue_task_casio,
